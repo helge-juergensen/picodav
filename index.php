@@ -1914,7 +1914,7 @@ namespace PicoDAV
 
 		public function route(?string $uri = null): bool
 		{
-			if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS' && ANONYMOUS_OPTIONS) {
+			if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS' && ANONYMOUS_OPTIONS || $this->storage->auth()) {
 				return parent::route($uri);
 			}
 			if (!ANONYMOUS_WRITE && !ANONYMOUS_READ && !$this->storage->auth()) {
