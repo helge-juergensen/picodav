@@ -1914,6 +1914,9 @@ namespace PicoDAV
 
 		public function route(?string $uri = null): bool
 		{
+			if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS' && ANONYMOUS_OPTIONS) {
+				return parent::route($uri);
+			}
 			if (!ANONYMOUS_WRITE && !ANONYMOUS_READ && !$this->storage->auth()) {
 				$this->requireAuth();
 				return true;
@@ -2033,6 +2036,7 @@ RewriteRule ^.*$ /index.php [END]
 	const DEFAULT_CONFIG = [
 		'ANONYMOUS_READ' => true,
 		'ANONYMOUS_WRITE' => false,
+		'ANONYMOUS_OPTIONS' => true,
 		'HTTP_LOG_FILE' => null,
 	];
 
