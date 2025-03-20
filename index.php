@@ -2014,7 +2014,7 @@ RewriteRule ^.*$ /index.php [END]
 		header("Pragma: cache");
 		header("Cache-Control: max-age=" . $seconds_to_cache);
 
-		$fp = fopen(__FILE__, 'r');
+		/*$fp = fopen(__FILE__, 'r');
 
 		if ($relative_uri == '.webdav/webdav.js') {
 			fseek($fp, 55024, SEEK_SET);
@@ -2025,7 +2025,24 @@ RewriteRule ^.*$ /index.php [END]
 			echo fread($fp, 7004);
 		}
 
-		fclose($fp);
+		fclose($fp);*/
+		$our_file_data = file_get_contents(__FILE__);
+		$start = mb_strpos($our_file_data, "/* " . $relative_uri . " */");
+		if ($start === false) {
+			http_response_code(500);
+			die('Cannot find data start for ' . $relative_uri);
+		}
+		$end = mb_strpos($our_file_data, "/* " . $relative_uri . " */", $start+1);
+		if ($end === false) {
+			http_response_code(500);
+			die('Cannot find data end for ' . $relative_uri);
+		}
+		if ($end <= $start) {
+			http_response_code(500);
+			die('Found wrong data indexes for ' . $relative_uri);
+		}
+		
+		echo mb_substr($our_file_data, $start, $end-$start);
 
 		exit;
 	}
@@ -2106,6 +2123,7 @@ RewriteRule ^.*$ /index.php [END]
 	exit;
 
 ?>
+/* .webdav/webdav.js */
 var css_url = document.currentScript.src.replace(/\/[^\/]+$/, '') + '/webdav.css';
 
 const WebDAVNavigator = (url, options) => {
@@ -2986,6 +3004,8 @@ if (url = document.querySelector('html').getAttribute('data-webdav-url')) {
 		'wopi_discovery_url': document.querySelector('html').getAttribute('data-wopi-discovery-url'),
 	});
 }
+/* .webdav/webdav.js */
+/* .webdav/webdav.css */
 :root {
 	--bg-color: #fff;
 	--fg-color: #000;
@@ -3453,5 +3473,5 @@ progress {
 		--active-color: orange;
 	}
 }
-
+/* .webdav/webdav.css */
 <?php } ?>
